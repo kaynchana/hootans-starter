@@ -1,5 +1,5 @@
 import { authClient } from '@/clients/authClient';
-import { postsLinkOptions } from '@/validations/posts-link-options';
+import { tweetsLinkOptions } from '@/validations/tweets-link-options';
 import { Link2Icon, MoonIcon, SunIcon } from '@radix-ui/react-icons';
 import { Button } from '@repo/ui/components/button';
 import { Link, createFileRoute } from '@tanstack/react-router';
@@ -21,12 +21,12 @@ function RouteComponent() {
       <div className="mt-3 flex gap-x-1.5">
         Click{' '}
         <Link
-          {...postsLinkOptions}
+          {...tweetsLinkOptions}
           className="flex items-center gap-x-1 text-blue-500 underline"
         >
           here <Link2Icon className="mt-0.5" />
         </Link>{' '}
-        to view your posts.
+        to view your tweets.
       </div>
       <div className="mt-3">
         For the source code, see{' '}

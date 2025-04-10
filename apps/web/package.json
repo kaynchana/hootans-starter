@@ -16,7 +16,8 @@
     "lint": "biome lint .",
     "preview": "pnpm env:run preview",
     "start": "pnpm env:run",
-    "typecheck": "tsc --build"
+    "typecheck": "tsc --build",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@radix-ui/react-icons": "catalog:",
@@ -38,8 +39,10 @@
     "valibot": "catalog:"
   },
   "devDependencies": {
+    "@playwright/test": "^1.42.1",
     "@repo/api": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
+    "@repo/tools-playwright-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tanstack/router-plugin": "catalog:",
     "@trpc/server": "catalog:",

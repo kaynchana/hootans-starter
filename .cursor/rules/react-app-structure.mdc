@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # React App Structure - TanStack Router Based
@@ -34,8 +34,8 @@ TanStack Router based routing structure.
 -   `src/routes/index.tsx` - Index route (homepage).
 -   `src/routes/_protected/` - Protected routes requiring authentication.
     -   `src/routes/_protected/layout.tsx` - Layout wrapper for protected routes.
-    -   `src/routes/_protected/posts/` - Feature-specific routes (e.g., posts management).
-    -   `src/routes/_protected/posts/-components/` - Components specific to this route.
+    -   `src/routes/_protected/tweets/` - Feature-specific routes (e.g., tweets management).
+    -   `src/routes/_protected/tweets/-components/` - Components specific to this route.
 -   `src/routes/_public/` - Public routes accessible without authentication.
     -   `src/routes/_public/layout.tsx` - Layout wrapper for public routes.
     -   `src/routes/_public/login.tsx`, `register.tsx` - Authentication pages.
@@ -48,7 +48,7 @@ TanStack Router based routing structure.
 Validation schemas using valibot.
 
 -   `src/validations/*.ts` - Validation schemas for forms, URL parameters, etc.
-    -   Example: `src/validations/posts-link-options.ts`
+    -   Example: `src/validations/tweets-link-options.ts`
 
 ## Monorepo Structure
 

@@ -15,6 +15,11 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**"]
     },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "passThroughEnv": ["PLAYWRIGHT_*"],
+      "outputs": ["playwright-report/**", "playwright-results.json"]
+    },
     "auth:schema:generate": {
       "cache": false,
       "interactive": true

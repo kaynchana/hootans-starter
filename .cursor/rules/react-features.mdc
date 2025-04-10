@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # React Features & Components - TanStack Router Based
@@ -24,12 +24,12 @@ Features are organized by route structure with TanStack Router.
 
 -   Protected Routes: `src/routes/_protected/`
     -   Layout: `src/routes/_protected/layout.tsx` - Shared layout for all protected routes.
-    -   Feature Routes: `src/routes/_protected/posts/` - Feature-specific routes.
-        -   Index: `src/routes/_protected/posts/index.tsx` - Main route component for the feature.
-        -   Detail: `src/routes/_protected/posts/$postid/index.tsx` - Dynamic route for individual items.
-        -   Components: `src/routes/_protected/posts/-components/` - Components specific to this feature.
-            -   Example: `src/routes/_protected/posts/-components/create-post.tsx`
-            -   Example: `src/routes/_protected/posts/-components/delete-post.tsx`
+    -   Feature Routes: `src/routes/_protected/tweets/` - Feature-specific routes.
+        -   Index: `src/routes/_protected/tweets/index.tsx` - Main route component for the feature.
+        -   Detail: `src/routes/_protected/tweets/$tweetid/index.tsx` - Dynamic route for individual items.
+        -   Components: `src/routes/_protected/tweets/-components/` - Components specific to this feature.
+            -   Example: `src/routes/_protected/tweets/-components/create-tweet.tsx`
+            -   Example: `src/routes/_protected/tweets/-components/delete-tweet.tsx`
 
 -   Public Routes: `src/routes/_public/`
     -   Layout: `src/routes/_public/layout.tsx` - Shared layout for all public routes.
@@ -42,7 +42,7 @@ Features are organized by route structure with TanStack Router.
 
 Validation schemas using valibot for forms, URL parameters, etc.
 
--   Example: `src/validations/posts-link-options.ts` - Defines validation for URL search parameters.
+-   Example: `src/validations/tweets-link-options.ts` - Defines validation for URL search parameters.
 
 ## Client Configuration: src/clients
 

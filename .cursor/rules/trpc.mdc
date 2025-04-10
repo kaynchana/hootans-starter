@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 ---
@@ -29,10 +29,10 @@ globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
       .mutation(({ input }) => { /* your code */ })
 
     // Or import schema from another file (preferred for reusability)
-    import { CreatePostSchema } from '@repo/db/schema';
+    import { CreateTweetSchema } from '@repo/db/schema';
 
     procedure
-      .input(CreatePostSchema)
+      .input(CreateTweetSchema)
       .mutation(({ input }) => { /* your code */ })
     ```
 
@@ -48,11 +48,11 @@ globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
 
     // server/routers/_app.ts
     import { userRouter } from './user';
-    import { postRouter } from './post';
+    import { tweetRouter } from './tweet';
 
     export const appRouter = router({
       user: userRouter,
-      post: postRouter,
+      tweet: tweetRouter,
     });
     ```
 
@@ -165,7 +165,7 @@ globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
     // server/index.ts
     import type { AuthInstance } from '@repo/auth/server';
     import type { DatabaseInstance } from '@repo/db/client';
-    import postRouter from './router/post';
+    import tweetRouter from './router/tweet';
     import { createTRPCContext, router } from './trpc';
 
     export const createApi = ({
@@ -177,7 +177,7 @@ globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
     }) => {
       return {
         trpcRouter: router({
-          posts: postRouter,
+          tweets: tweetRouter,
         }),
         createTRPCContext: ({ headers }: { headers: Headers }) =>
           createTRPCContext({ auth, db, headers }),
@@ -186,7 +186,7 @@ globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
 
     // Export type only for client usage
     export const appRouter = router({
-      posts: postRouter,
+      tweets: tweetRouter,
     });
 
     export type AppRouter = typeof appRouter;
@@ -256,7 +256,7 @@ import { createInsertSchema } from 'drizzle-valibot';
 import * as v from 'valibot';
 
 // Define database table schema
-export const post = pgTable('post', (t) => ({
+export const tweet = pgTable('tweet', (t) => ({
   id: t.uuid().notNull().primaryKey().defaultRandom(),
   title: t.varchar({ length: 256 }).notNull(),
   content: t.text().notNull(),
@@ -265,8 +265,8 @@ export const post = pgTable('post', (t) => ({
 }));
 
 // Create validation schema from table schema
-export const CreatePostSchema = v.omit(
-  createInsertSchema(post, {
+export const CreateTweetSchema = v.omit(
+  createInsertSchema(tweet, {
     title: v.pipe(v.string(), v.maxLength(256)),
     content: v.pipe(v.string(), v.maxLength(512)),
   }),
@@ -280,11 +280,11 @@ Use structured error handling with tRPC:
 
 ```typescript
 try {
-  await createPostMutation.mutateAsync({
+  await createTweetMutation.mutateAsync({
     title: value.title,
     content: value.content,
   });
-  toast.success('Your post has been created!');
+  toast.success('Your tweet has been created!');
 } catch (error) {
   if (error instanceof TRPCClientError) {
     toast.error(error.message);
@@ -309,17 +309,17 @@ export const trpc = createTRPCOptionsProxy<AppRouter>({
 });
 
 // In route component
-export const Route = createFileRoute('/_protected/posts/')({
-  loader: () => queryClient.ensureQueryData(trpc.posts.all.queryOptions()),
+export const Route = createFileRoute('/_protected/tweets/')({
+  loader: () => queryClient.ensureQueryData(trpc.tweets.all.queryOptions()),
   component: RouteComponent,
   validateSearch: (input: SearchSchemaInput) =>
-    v.parse(postsSearchSchema, input),
+    v.parse(tweetsSearchSchema, input),
 });
 
 // In component
 function RouteComponent() {
-  const { data: posts } = useQuery(trpc.posts.all.queryOptions());
-  const mutation = useMutation(trpc.posts.create.mutationOptions());
+  const { data: tweets } = useQuery(trpc.tweets.all.queryOptions());
+  const mutation = useMutation(trpc.tweets.create.mutationOptions());
 
   // Use data and mutations
 }

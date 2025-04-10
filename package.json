@@ -21,6 +21,7 @@
     "start": "turbo run start",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
+    "test:e2e": "turbo run test:e2e",
     "collect-coverage": "turbo run collect-json-reports -F @repo/tools-vitest-config",
     "merge-coverage": "turbo run merge-json-reports -F @repo/tools-vitest-config",
     "report": "turbo run report -F @repo/tools-vitest-config",
