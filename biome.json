@@ -1,0 +1,149 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "complexity": {
+        "noForEach": "warn",
+        "useOptionalChain": "error",
+        "noStaticOnlyClass": "error"
+      },
+      "suspicious": {
+        "noConsoleLog": "warn",
+        "noExplicitAny": "off",
+        "noArrayIndexKey": "warn",
+        "noEmptyInterface": "error",
+        "noImplicitAnyLet": "warn"
+      },
+      "style": {
+        "useImportType": "warn",
+        "useExportType": "warn",
+        "noUnusedTemplateLiteral": "off",
+        "useTemplate": "error",
+        "useConst": "error",
+        "noNegationElse": "warn"
+      },
+      "correctness": {
+        "noChildrenProp": "off",
+        "useExhaustiveDependencies": "warn",
+        "noUnusedVariables": "error"
+      },
+      "a11y": {
+        "useKeyWithClickEvents": "error",
+        "useValidAnchor": "error",
+        "noSvgWithoutTitle": "warn"
+      },
+      "performance": {
+        "noAccumulatingSpread": "warn"
+      },
+      "security": {
+        "noDangerouslySetInnerHtml": "error"
+      }
+    },
+    "ignore": [
+      "dist/**",
+      "node_modules/**",
+      ".turbo/**",
+      ".cache/**",
+      "**/*.gen.ts",
+      "**/*.gen.tsx",
+      "coverage/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "formatWithErrors": false,
+    "lineEnding": "lf",
+    "ignore": [
+      "dist/**",
+      "node_modules/**",
+      ".turbo/**",
+      ".cache/**",
+      "coverage/**"
+    ]
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always"
+    }
+  },
+  "json": {
+    "parser": {
+      "allowComments": true,
+      "allowTrailingCommas": true
+    },
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2
+    }
+  },
+  "files": {
+    "ignore": [
+      ".git/**",
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.turbo/**",
+      "**/.cache/**",
+      "**/tsconfig*.json",
+      "tools/typescript/**/*.json",
+      "coverage/**"
+    ],
+    "maxSize": 2000000
+  },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "overrides": [
+    {
+      "include": ["apps/web/**/*.tsx", "packages/ui/**/*.tsx"],
+      "linter": {
+        "rules": {
+          "a11y": {
+            "useAltText": "error",
+            "noAutofocus": "warn",
+            "noBlankTarget": "error"
+          }
+        }
+      }
+    },
+    {
+      "include": ["apps/server/**/*.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsoleLog": "error"
+          },
+          "security": {
+            "noDangerouslySetInnerHtml": "off"
+          }
+        }
+      }
+    },
+    {
+      "include": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
+}

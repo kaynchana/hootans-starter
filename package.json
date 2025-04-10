@@ -1,0 +1,51 @@
+{
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "auth:schema:generate": "turbo run auth:schema:generate",
+    "postauth:schema:generate": "echo NOTE: you will also need to fix styles and db:push your new schema",
+    "build": "turbo run build",
+    "clean": "turbo run clean",
+    "db:push": "turbo -F @repo/db push",
+    "db:studio": "turbo -F @repo/db studio",
+    "dev": "turbo watch dev --continue",
+    "env:copy-example": "turbo run env:copy-example",
+    "env:remove": "turbo run env:remove",
+    "format": "pnpm biome:format",
+    "format:fix": "pnpm biome:format",
+    "generate-routes": "turbo -F web generate-routes",
+    "lint": "pnpm biome:lint",
+    "lint:fix": "pnpm biome:lint",
+    "postclean": "git clean -xdf .cache .turbo node_modules",
+    "start": "turbo run start",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "collect-coverage": "turbo run collect-json-reports -F @repo/tools-vitest-config",
+    "merge-coverage": "turbo run merge-json-reports -F @repo/tools-vitest-config",
+    "report": "turbo run report -F @repo/tools-vitest-config",
+    "view-report": "turbo run view-report -F @repo/tools-vitest-config",
+    "typecheck": "turbo run typecheck",
+    "ui-add": "turbo run ui-add -F @repo/ui --",
+    "biome:check": "biome check .",
+    "biome:format": "biome format . --write",
+    "biome:lint": "biome lint . --apply"
+  },
+  "packageManager": "pnpm@10.7.1",
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "turbo": "catalog:"
+  },
+  "engines": {
+    "node": ">=22.10.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@babel/helpers@<7.26.10": "^7.26.10",
+      "cookie@<0.7.0": "^0.7.0",
+      "esbuild@<0.25.0": "^0.25.0"
+    },
+    "onlyBuiltDependencies": [],
+    "ignoredBuiltDependencies": ["@swc/core", "esbuild"]
+  }
+}

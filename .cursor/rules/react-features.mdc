@@ -1,0 +1,281 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# React Features & Components - TanStack Router Based
+
+This file defines the structure for route-based features and shared components in a TanStack Router application.
+
+## Shared Components: src/routes/-components
+
+Generic UI components reusable across different routes.
+
+-   Directory Structure: Components are organized by category.
+    -   `src/routes/-components/common/` - Common UI components like spinners, form fields, etc.
+    -   `src/routes/-components/layout/` - Layout components like navigation, headers, etc.
+-   Component Naming: Use descriptive names with kebab-case for directories and PascalCase for component files.
+    -   Example: `src/routes/-components/common/spinner.tsx`
+    -   Example: `src/routes/-components/layout/nav/navbar.tsx`
+
+## Route-Based Features: src/routes/_protected and src/routes/_public
+
+Features are organized by route structure with TanStack Router.
+
+-   Protected Routes: `src/routes/_protected/`
+    -   Layout: `src/routes/_protected/layout.tsx` - Shared layout for all protected routes.
+    -   Feature Routes: `src/routes/_protected/posts/` - Feature-specific routes.
+        -   Index: `src/routes/_protected/posts/index.tsx` - Main route component for the feature.
+        -   Detail: `src/routes/_protected/posts/$postid/index.tsx` - Dynamic route for individual items.
+        -   Components: `src/routes/_protected/posts/-components/` - Components specific to this feature.
+            -   Example: `src/routes/_protected/posts/-components/create-post.tsx`
+            -   Example: `src/routes/_protected/posts/-components/delete-post.tsx`
+
+-   Public Routes: `src/routes/_public/`
+    -   Layout: `src/routes/_public/layout.tsx` - Shared layout for all public routes.
+    -   Authentication: `src/routes/_public/login.tsx`, `src/routes/_public/register.tsx`
+    -   Components: `src/routes/_public/-components/` - Components specific to public routes.
+        -   Example: `src/routes/_public/-components/login-form.tsx`
+        -   Example: `src/routes/_public/-components/register-form.tsx`
+
+## Validation Schemas: src/validations
+
+Validation schemas using valibot for forms, URL parameters, etc.
+
+-   Example: `src/validations/posts-link-options.ts` - Defines validation for URL search parameters.
+
+## Client Configuration: src/clients
+
+API clients and related configuration.
+
+-   `src/clients/authClient.ts` - Authentication client setup.
+-   `src/clients/queryClient.ts` - TanStack Query client configuration.
+-   `src/clients/trpcClient.ts` - tRPC client setup with server URL configuration.
+
+## Form Handling with TanStack Form
+
+Use TanStack Form with valibot for form validation:
+
+```tsx
+import { useForm } from '@tanstack/react-form';
+import * as v from 'valibot';
+
+// Define validation schema with valibot
+const FormSchema = v.object({
+  email: v.pipe(v.string(), v.email('Please enter a valid email address')),
+  password: v.pipe(
+    v.string(),
+    v.minLength(8, 'Password must be at least 8 characters'),
+  ),
+});
+
+// Use TanStack Form hook
+const form = useForm({
+  defaultValues: {
+    email: '',
+    password: '',
+  },
+  validators: {
+    onChange: FormSchema, // Apply valibot validation on change
+  },
+  onSubmit: async ({ value }) => {
+    // Handle form submission
+    try {
+      // API call or other logic
+      toast.success('Success message');
+    } catch (error) {
+      toast.error('Error message');
+    }
+  },
+});
+
+// Form component with field validation
+return (
+  <form
+    onSubmit={(e) => {
+      e.preventDefault();
+      form.handleSubmit();
+    }}
+  >
+    <form.Field
+      name="email"
+      children={(field) => (
+        <>
+          <Label htmlFor={field.name}>Email</Label>
+          <Input
+            id={field.name}
+            value={field.state.value}
+            onChange={(e) => field.handleChange(e.target.value)}
+          />
+          {field.state.meta.touchedErrors ? (
+            <p className="text-destructive text-sm mt-1">
+              {field.state.meta.touchedErrors}
+            </p>
+          ) : null}
+        </>
+      )}
+    />
+    {/* Other fields... */}
+    <Button type="submit">Submit</Button>
+  </form>
+);
+```
+
+## UI Component Patterns (shadcn/ui)
+
+Use the shadcn/ui component patterns, which are based on Radix UI primitives with Tailwind CSS styling:
+
+### 1. Primitive Component Pattern
+
+```tsx
+import * as React from 'react';
+import { cn } from '@repo/ui/lib/utils';
+
+const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<'input'>>
+  (({ className, type, ...props }, ref) => {
+    return (
+      <input
+        type={type}
+        className={cn(
+          'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    );
+  });
+Input.displayName = 'Input';
+
+export { Input };
+```
+
+### 2. Radix UI Composition Pattern
+
+```tsx
+import * as React from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { cn } from '@repo/ui/lib/utils';
+
+const Dialog = DialogPrimitive.Root;
+const DialogTrigger = DialogPrimitive.Trigger;
+const DialogPortal = DialogPrimitive.Portal;
+const DialogClose = DialogPrimitive.Close;
+
+const DialogOverlay = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Overlay>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+  <DialogPrimitive.Overlay
+    ref={ref}
+    className={cn(
+      'fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      className,
+    )}
+    {...props}
+  />
+));
+DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
+
+const DialogContent = React.forwardRef<
+  React.ElementRef<typeof DialogPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
+>(({ className, children, ...props }, ref) => (
+  <DialogPortal>
+    <DialogOverlay />
+    <DialogPrimitive.Content
+      ref={ref}
+      className={cn(
+        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg',
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+        <Cross2Icon className="h-4 w-4" />
+        <span className="sr-only">Close</span>
+      </DialogPrimitive.Close>
+    </DialogPrimitive.Content>
+  </DialogPortal>
+));
+DialogContent.displayName = DialogPrimitive.Content.displayName;
+```
+
+### 3. Class Variance Authority (CVA) for Component Variants
+
+```tsx
+import * as React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@repo/ui/lib/utils';
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/70',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/70',
+        outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/70',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        link: 'text-primary underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>
+  (({ className, variant, size, asChild = false, ...props }, ref) => {
+    const Comp = asChild ? Slot : 'button';
+    return (
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  });
+Button.displayName = 'Button';
+
+export { Button, buttonVariants };
+```
+
+### 4. Utility Function for Class Names
+
+Use the `cn` utility function from `@repo/ui/lib/utils` to conditionally join class names:
+
+```tsx
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+## Shared Packages in Monorepo
+
+Reusable code is organized in shared packages:
+
+-   `@repo/ui` - Shared UI component library that can be used across all applications.
+-   `@repo/api` - API client and server code with tRPC procedures.
+-   `@repo/db` - Database schemas and client with validation schemas.

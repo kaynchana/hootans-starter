@@ -1,0 +1,338 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+---
+description: Guidelines for writing Next.js apps with tRPC
+globs: "**/*.ts, **/*.tsx, **/*.js, **/*.jsx"
+---
+
+## Overview
+
+[tRPC](mdc:https:/trpc.io) enables end-to-end typesafe APIs, allowing you to build and consume APIs without schemas, code generation, or runtime errors. These rules will help you follow best practices for tRPC v11.
+
+## Best Practices
+
+1. **Use Valibot for Input Validation**: Always validate procedure inputs with Valibot for better type safety and runtime validation. You can define schemas inline or import them from schema files.
+
+    ```typescript
+    import * as v from 'valibot';
+
+    // Inline schema definition
+    procedure
+      .input(v.object({
+        id: v.pipe(v.string(), v.uuid()),
+        email: v.pipe(v.string(), v.email()),
+        age: v.pipe(v.number(), v.minValue(18))
+      }))
+      .mutation(({ input }) => { /* your code */ })
+
+    // Or import schema from another file (preferred for reusability)
+    import { CreatePostSchema } from '@repo/db/schema';
+
+    procedure
+      .input(CreatePostSchema)
+      .mutation(({ input }) => { /* your code */ })
+    ```
+
+2. **Organize Routers by Feature**: Split your routers into logical domains/features rather than having one large router.
+
+    ```typescript
+    // server/routers/user.ts
+    export const userRouter = router({
+      list: publicProcedure.query(() => { /* ... */ }),
+      byId: publicProcedure.input(v.pipe(v.string(), v.uuid())).query(({ input }) => { /* ... */ }),
+      create: publicProcedure.input(/* ... */).mutation(({ input }) => { /* ... */ }),
+    });
+
+    // server/routers/_app.ts
+    import { userRouter } from './user';
+    import { postRouter } from './post';
+
+    export const appRouter = router({
+      user: userRouter,
+      post: postRouter,
+    });
+    ```
+
+3. **Use Middleware for Common Logic**: Apply middleware for authentication, logging, or other cross-cutting concerns.
+
+    ```typescript
+    const isAuthed = t.middleware(({ next, ctx }) => {
+      if (!ctx.user) {
+        throw new TRPCError({ code: 'UNAUTHORIZED' });
+      }
+      return next({
+        ctx: {
+          // Add user information to context
+          user: ctx.user,
+        },
+      });
+    });
+
+    const protectedProcedure = t.procedure.use(isAuthed);
+    ```
+
+4. **Use Proper Error Handling**: Utilize tRPC's error handling for consistent error responses.
+
+    ```typescript
+    import { TRPCError } from '@trpc/server';
+
+    publicProcedure
+      .input(v.pipe(v.string(), v.uuid()))
+      .query(({ input }) => {
+        const user = getUserById(input);
+        if (!user) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: `User with id ${input} not found`,
+          });
+        }
+        return user;
+      });
+    ```
+
+5. **Use Data Transformers**: Use SuperJSON for automatic handling of dates, Maps, Sets, etc.
+
+    ```typescript
+    import { initTRPC } from '@trpc/server';
+    import superjson from 'superjson';
+
+    const t = initTRPC.create({
+      transformer: superjson,
+    });
+    ```
+
+6. **Leverage TanStack Query Integration**: For React projects, use tRPC's TanStack Query utilities for data fetching, mutations, and caching.
+
+    ```tsx
+    import { useQuery, useMutation } from '@tanstack/react-query';
+    import { trpc } from '@/clients/trpc';
+
+    function UserProfile({ userId }: { userId: string }) {
+      // Using the options pattern
+      const { data, isLoading, error } = useQuery(trpc.user.byId.queryOptions(userId));
+      const mutation = useMutation(trpc.user.update.mutationOptions());
+
+      if (isLoading) return <div>Loading...</div>;
+      if (error) return <div>Error: {error.message}</div>;
+
+      const handleUpdate = async () => {
+        await mutation.mutateAsync({ id: userId, name: 'New Name' });
+      };
+
+      return <div>{data.name}</div>;
+    }
+    ```
+
+7. **Context Creation**: Create a proper context object to share resources across procedures.
+
+    ```typescript
+    // server/trpc.ts
+    import { initTRPC, TRPCError } from '@trpc/server';
+    import SuperJSON from 'superjson';
+    import type { AuthInstance } from '@repo/auth/server';
+    import type { DatabaseInstance } from '@repo/db/client';
+
+    export const createTRPCContext = async ({
+      auth,
+      db,
+      headers,
+    }: {
+      auth: AuthInstance;
+      db: DatabaseInstance;
+      headers: Headers;
+    }): Promise<{
+      db: DatabaseInstance;
+      session: AuthInstance['$Infer']['Session'] | null;
+    }> => {
+      const session = await auth.api.getSession({
+        headers,
+      });
+      return {
+        db,
+        session,
+      };
+    };
+
+    export type Context = Awaited<ReturnType<typeof createTRPCContext>>;
+    ```
+
+8. **Type Exports and API Creation**: Only export types, not the actual router implementations, from your server code to client code. Use a factory pattern for creating the API.
+
+    ```typescript
+    // server/index.ts
+    import type { AuthInstance } from '@repo/auth/server';
+    import type { DatabaseInstance } from '@repo/db/client';
+    import postRouter from './router/post';
+    import { createTRPCContext, router } from './trpc';
+
+    export const createApi = ({
+      auth,
+      db,
+    }: {
+      auth: AuthInstance;
+      db: DatabaseInstance;
+    }) => {
+      return {
+        trpcRouter: router({
+          posts: postRouter,
+        }),
+        createTRPCContext: ({ headers }: { headers: Headers }) =>
+          createTRPCContext({ auth, db, headers }),
+      };
+    };
+
+    // Export type only for client usage
+    export const appRouter = router({
+      posts: postRouter,
+    });
+
+    export type AppRouter = typeof appRouter;
+    ```
+
+9. **Procedure Types**: Use different procedure types for different authorization levels.
+
+    ```typescript
+    export const publicProcedure = t.procedure;
+    export const protectedProcedure = t.procedure.use(isAuthed);
+    export const adminProcedure = t.procedure.use(isAdmin);
+    ```
+
+10. **Client Setup and Performance Optimization**: Set up the tRPC client with proper configuration for batching and credentials.
+
+    ```typescript
+    // client/index.ts
+    import { createTRPCClient, httpBatchLink } from '@trpc/client';
+    import SuperJSON from 'superjson';
+    import urlJoin from 'url-join';
+    import type { AppRouter } from '../server';
+
+    export interface APIClientOptions {
+      serverUrl: string;
+    }
+
+    export const createTrpcClient = ({ serverUrl }: APIClientOptions) => {
+      return createTRPCClient<AppRouter>({
+        links: [
+          httpBatchLink({
+            url: urlJoin(serverUrl, 'trpc'),
+            transformer: SuperJSON,
+            fetch(url, options) {
+              return fetch(url, {
+                ...options,
+                // Required for cross-domain authentication
+                credentials: 'include',
+              });
+            },
+          }),
+        ],
+      });
+    };
+    ```
+
+    And in your application setup:
+
+    ```typescript
+    // router.tsx
+    import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
+    import { queryClient } from '@/clients/queryClient';
+    import { trpcClient } from '@/clients/trpcClient';
+
+    export const trpc = createTRPCOptionsProxy<AppRouter>({
+      client: trpcClient,
+      queryClient,
+    });
+    ```
+
+## Integration with Drizzle ORM
+
+Use Drizzle ORM with valibot for schema validation:
+
+```typescript
+import { pgTable } from 'drizzle-orm/pg-core';
+import { createInsertSchema } from 'drizzle-valibot';
+import * as v from 'valibot';
+
+// Define database table schema
+export const post = pgTable('post', (t) => ({
+  id: t.uuid().notNull().primaryKey().defaultRandom(),
+  title: t.varchar({ length: 256 }).notNull(),
+  content: t.text().notNull(),
+  createdAt: t.timestamp().defaultNow().notNull(),
+  createdBy: t.text().references(() => user.id).notNull(),
+}));
+
+// Create validation schema from table schema
+export const CreatePostSchema = v.omit(
+  createInsertSchema(post, {
+    title: v.pipe(v.string(), v.maxLength(256)),
+    content: v.pipe(v.string(), v.maxLength(512)),
+  }),
+  ['id', 'createdAt', 'createdBy'],
+);
+```
+
+## Error Handling Best Practices
+
+Use structured error handling with tRPC:
+
+```typescript
+try {
+  await createPostMutation.mutateAsync({
+    title: value.title,
+    content: value.content,
+  });
+  toast.success('Your post has been created!');
+} catch (error) {
+  if (error instanceof TRPCClientError) {
+    toast.error(error.message);
+  } else {
+    toast.error('An unknown error has occurred. Please try again!');
+  }
+}
+```
+
+## Integration with TanStack Router
+
+Use tRPC with TanStack Router for type-safe data fetching:
+
+```typescript
+// In router.tsx
+import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query';
+import type { AppRouter } from '@repo/api/server';
+
+export const trpc = createTRPCOptionsProxy<AppRouter>({
+  client: trpcClient,
+  queryClient,
+});
+
+// In route component
+export const Route = createFileRoute('/_protected/posts/')({
+  loader: () => queryClient.ensureQueryData(trpc.posts.all.queryOptions()),
+  component: RouteComponent,
+  validateSearch: (input: SearchSchemaInput) =>
+    v.parse(postsSearchSchema, input),
+});
+
+// In component
+function RouteComponent() {
+  const { data: posts } = useQuery(trpc.posts.all.queryOptions());
+  const mutation = useMutation(trpc.posts.create.mutationOptions());
+
+  // Use data and mutations
+}
+```
+
+## Version Compatibility
+
+This guide is for tRPC v11, which requires:
+- TypeScript >= 5.7.2
+- Strict TypeScript mode (`"strict": true` in tsconfig.json)
+
+## Further Resources
+
+- [Official Documentation](mdc:https:/trpc.io/docs)
+- [GitHub Repository](mdc:https:/github.com/trpc/trpc)
+- [Example Apps](mdc:https:/trpc.io/docs/example-apps)

@@ -1,0 +1,167 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Hono API Server Best Practices
+
+This file defines best practices for building API servers with Hono and tRPC integration.
+
+## Server Structure
+
+-   `src/index.ts` - Main entry point that sets up the Hono app, middleware, and routes.
+-   `src/env.ts` - Environment variables validation using valibot.
+
+## Hono App Setup
+
+```typescript
+import { serve } from '@hono/node-server';
+import { trpcServer } from '@hono/trpc-server';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { logger } from 'hono/logger';
+
+// Define path constants for better maintainability
+const wildcardPath = {
+  ALL: '*',
+  BETTER_AUTH: '/api/auth/*',
+  TRPC: '/trpc/*',
+} as const;
+
+// Create the Hono app with proper typing
+const app = new Hono<{
+  Variables: {
+    user: typeof auth.$Infer.Session.user | null;
+    session: typeof auth.$Infer.Session.session | null;
+  };
+}>();
+
+// Apply middleware
+app.use(logger());
+
+// Configure CORS for specific routes
+app.use(
+  wildcardPath.TRPC,
+  cors({
+    origin: trustedOrigins,
+    credentials: true,
+  }),
+);
+
+// Health check endpoint
+app.get('/healthcheck', (c) => {
+  return c.text('OK');
+});
+
+// Start the server
+const server = serve(
+  {
+    fetch: app.fetch,
+    port: env.SERVER_PORT,
+    hostname: env.SERVER_HOST,
+  },
+  (info) => {
+    const host = info.family === 'IPv6' ? `[${info.address}]` : info.address;
+    console.info(`Hono server: http://${host}:${info.port}`);
+  },
+);
+
+// Graceful shutdown
+const shutdown = () => {
+  server.close((error) => {
+    if (error) {
+      console.error(error);
+    } else {
+      console.info('\nServer has stopped gracefully.');
+    }
+    process.exit(0);
+  });
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+```
+
+## tRPC Integration
+
+Use the `@hono/trpc-server` adapter to integrate tRPC with Hono:
+
+```typescript
+// Mount tRPC router
+app.use(
+  wildcardPath.TRPC,
+  trpcServer({
+    router: api.trpcRouter,
+    createContext: (c) => api.createTRPCContext({ headers: c.req.headers }),
+  }),
+);
+```
+
+## Environment Variables
+
+Use valibot for type-safe environment variables:
+
+```typescript
+import * as v from 'valibot';
+
+const createPortSchema = ({ defaultPort }: { defaultPort: number }) =>
+  v.pipe(
+    v.optional(v.string(), `${defaultPort}`),
+    v.transform((s) => parseInt(s, 10)),
+    v.number(),
+    v.minValue(0),
+    v.maxValue(65535),
+  );
+
+export const envSchema = v.object({
+  SERVER_PORT: createPortSchema({ defaultPort: 3035 }),
+  SERVER_HOST: v.pipe(
+    v.optional(v.string(), 'localhost'),
+    v.minLength(1),
+  ),
+  SERVER_AUTH_SECRET: v.pipe(v.string(), v.minLength(1)),
+  SERVER_POSTGRES_URL: v.string(),
+  PUBLIC_WEB_URL: v.pipe(v.string(), v.url()),
+});
+
+export const env = v.parse(envSchema, process.env);
+```
+
+## Authentication Integration
+
+Integrate authentication middleware with Hono:
+
+```typescript
+// Mount authentication handler
+app.on(['POST', 'GET'], wildcardPath.BETTER_AUTH, (c) =>
+  auth.handler(c.req.raw),
+);
+```
+
+## Docker Deployment
+
+Create a production-ready Dockerfile:
+
+```dockerfile
+FROM node:22-alpine AS base
+
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+# Build stages...
+
+FROM base AS production
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 hono
+
+COPY --from=installer --chown=hono:nodejs /app/dist /app/dist
+
+USER hono
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD wget --quiet --spider http://${SERVER_HOST}:${SERVER_PORT}/healthcheck || exit 1
+
+CMD ["node", "/app/dist/index.js"]
+```

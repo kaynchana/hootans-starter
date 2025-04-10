@@ -1,0 +1,17 @@
+node_modules/
+dist/
+out/
+
+.cache/
+.turbo/
+
+# Vitest related
+coverage/
+*.coverage.json
+coverage.json
+
+.env*
+!.env.example
+
+.DS_Store
+.vscode

@@ -1,0 +1,76 @@
+# Build outputs
+dist/
+**/dist/
+.turbo/
+**/.turbo/
+.cache/
+**/.cache/
+build/
+**/build/
+.next/
+**/.next/
+out/
+**/out/
+
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+.yarn/
+
+# Generated files
+*.gen.ts
+*.gen.tsx
+**/*.gen.ts
+**/*.gen.tsx
+**/*.generated.ts
+**/*.generated.tsx
+
+# Coverage reports
+coverage/
+**/coverage/
+.nyc_output/
+**/.nyc_output/
+
+# Environment and local files
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+.local
+*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS specific
+.DS_Store
+Thumb.db
+
+# Package specific
+**/tsconfig.tsbuildinfo
+**/.stylelintcache
+
+# Config files that might contain comments (JSON5)
+**/tsconfig*.json
+tools/typescript/**/*.json

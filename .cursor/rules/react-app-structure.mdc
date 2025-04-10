@@ -1,0 +1,129 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# React App Structure - TanStack Router Based
+
+This file defines the core application structure for a React app using TanStack Router.
+
+## Main Source Directory: src
+
+The primary container for all application code.
+
+-   `src/main.tsx` - The application entry point. Initializes React, ThemeProvider, RouterProvider, etc.
+-   `src/env.ts` - Environment variables validation and typing using valibot.
+    -   Example: `PUBLIC_SERVER_URL`, `PUBLIC_BASE_PATH`
+-   `src/router.tsx` - TanStack Router setup and configuration.
+    -   Creates the router instance and sets up TRPC integration.
+-   `src/routeTree.gen.ts` - Auto-generated route tree from TanStack Router plugin.
+
+## Client Configuration: src/clients
+
+API clients and related configuration.
+
+-   `src/clients/authClient.ts` - Authentication client setup.
+-   `src/clients/queryClient.ts` - TanStack Query client configuration.
+-   `src/clients/trpcClient.ts` - tRPC client setup with server URL configuration.
+
+## Routing Structure: src/routes
+
+TanStack Router based routing structure.
+
+-   `src/routes/__root.tsx` - Root route component that wraps the entire application.
+-   `src/routes/index.tsx` - Index route (homepage).
+-   `src/routes/_protected/` - Protected routes requiring authentication.
+    -   `src/routes/_protected/layout.tsx` - Layout wrapper for protected routes.
+    -   `src/routes/_protected/posts/` - Feature-specific routes (e.g., posts management).
+    -   `src/routes/_protected/posts/-components/` - Components specific to this route.
+-   `src/routes/_public/` - Public routes accessible without authentication.
+    -   `src/routes/_public/layout.tsx` - Layout wrapper for public routes.
+    -   `src/routes/_public/login.tsx`, `register.tsx` - Authentication pages.
+-   `src/routes/-components/` - Shared components used across multiple routes.
+    -   `src/routes/-components/common/` - Common UI components (e.g., Spinner, form fields).
+    -   `src/routes/-components/layout/` - Layout components (e.g., navigation).
+
+## Validation: src/validations
+
+Validation schemas using valibot.
+
+-   `src/validations/*.ts` - Validation schemas for forms, URL parameters, etc.
+    -   Example: `src/validations/posts-link-options.ts`
+
+## Monorepo Structure
+
+The application is part of a monorepo with shared packages:
+
+-   `@repo/api` - API client and server code with tRPC.
+-   `@repo/auth` - Authentication logic and utilities.
+-   `@repo/db` - Database schemas and client.
+-   `@repo/ui` - Shared UI components library.
+-   `@repo/typescript-config` - Shared TypeScript configuration.
+-   `@repo/tailwind-config` - Shared Tailwind CSS configuration.
+
+## Environment Variables
+
+Use valibot for type-safe environment variables:
+
+```typescript
+import * as v from 'valibot';
+
+export const CLIENT_ENV_PREFIX = 'PUBLIC_';
+
+export const envSchema = v.object({
+  /**
+   * This is the backend API server. Note that this should be passed as
+   * a build-time variable (ARG) in docker.
+   */
+  PUBLIC_SERVER_URL: v.pipe(v.string(), v.url()),
+
+  /**
+   * Set this if you want to run or deploy your app at a base URL. This is
+   * usually required for deploying a repository to Github/Gitlab pages.
+   */
+  PUBLIC_BASE_PATH: v.pipe(v.optional(v.string(), '/'), v.startsWith('/')),
+});
+
+export const env = v.parse(envSchema, import.meta.env);
+```
+
+## Docker Deployment
+
+Create a production-ready Dockerfile:
+
+```dockerfile
+FROM node:22-alpine AS base
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV TURBO_TELEMETRY_DISABLED=1
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+ENV CI=1
+
+RUN corepack enable pnpm
+
+# Build stages...
+
+FROM base AS builder
+
+RUN pnpm install --global turbo@^2
+
+COPY . .
+
+# https://turbo.build/repo/docs/guides/tools/docker#the-solution
+RUN turbo prune web --docker
+
+# Install dependencies and build
+FROM base AS installer
+
+ARG PUBLIC_SERVER_URL
+ENV PUBLIC_SERVER_URL=${PUBLIC_SERVER_URL}
+
+COPY --from=builder /app/out/json/ .
+RUN pnpm install --frozen-lockfile
+
+COPY --from=builder /app/out/full/ .
+RUN pnpm build
+```

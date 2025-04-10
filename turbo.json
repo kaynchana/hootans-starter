@@ -1,0 +1,97 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "dependsOn": ["^dev"],
+      "persistent": false,
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "auth:schema:generate": {
+      "cache": false,
+      "interactive": true
+    },
+    "format": {
+      "dependsOn": ["biome:format"],
+      "outputLogs": "new-only"
+    },
+    "lint": {
+      "dependsOn": ["biome:lint"],
+      "outputLogs": "new-only"
+    },
+    "biome:check": {
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "biome:format": {
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "biome:lint": {
+      "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": [".cache/tsbuildinfo.json"]
+    },
+    "push": {
+      "env": ["DB_POSTGRES_URL"],
+      "cache": false,
+      "interactive": true
+    },
+    "start": {
+      "dependsOn": ["^build"]
+    },
+    "studio": {
+      "cache": false,
+      "persistent": true
+    },
+    "ui-add": {
+      "cache": false,
+      "interactive": true
+    },
+    "env:copy-example": {
+      "cache": false
+    },
+    "env:remove": {
+      "cache": false
+    },
+    "generate-routes": {
+      "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build", "@repo/tools-vitest-config#build"],
+      "outputs": ["coverage/**", "coverage.json"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "collect-json-reports": {
+      "cache": false
+    },
+    "merge-json-reports": {
+      "inputs": ["coverage/raw/**"],
+      "outputs": ["coverage/merged/**"]
+    },
+    "report": {
+      "dependsOn": ["merge-json-reports"],
+      "inputs": ["coverage/merged"],
+      "outputs": ["coverage/report/**"]
+    },
+    "view-report": {
+      "cache": false
+    }
+  },
+  "globalEnv": [],
+  "globalPassThroughEnv": ["NODE_ENV", "CI", "npm_lifecycle_event"]
+}
