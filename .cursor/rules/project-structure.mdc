@@ -1,13 +1,33 @@
 ---
-description: 
-globs: 
+description:
+globs:
 alwaysApply: false
 ---
-# React App Structure - TanStack Router Based
+# Project Structure
 
-This file defines the core application structure for a React app using TanStack Router.
+This file defines the overall project structure and the structure of each app in the monorepo.
 
-## Main Source Directory: src
+## Monorepo Root Structure
+
+The project is organized as a monorepo with the following main directories:
+
+- `apps/` - Contains all applications
+  - `apps/web/` - React frontend application
+  - `apps/server/` - Hono-based backend server
+- `packages/` - Shared packages used across applications
+  - `packages/api/` - API client and server code with tRPC
+  - `packages/auth/` - Authentication logic and utilities
+  - `packages/db/` - Database schemas and client
+  - `packages/ui/` - Shared UI components library
+- `tools/` - Development and build tools
+  - `tools/playwright-config/` - Shared Playwright configuration
+  - `tools/tailwind/` - Shared Tailwind CSS configuration
+  - `tools/typescript/` - Shared TypeScript configuration
+  - `tools/vitest-config/` - Shared Vitest configuration
+
+## Web App Structure (apps/web)
+
+### Main Source Directory: src
 
 The primary container for all application code.
 
@@ -50,16 +70,21 @@ Validation schemas using valibot.
 -   `src/validations/*.ts` - Validation schemas for forms, URL parameters, etc.
     -   Example: `src/validations/tweets-link-options.ts`
 
-## Monorepo Structure
+## Server App Structure (apps/server)
 
-The application is part of a monorepo with shared packages:
+The server application is built with Hono and tRPC.
+
+-   `src/index.ts` - The server entry point. Sets up Hono app, middleware, and routes.
+-   `src/env.ts` - Environment variables validation and typing using valibot.
+
+## Shared Packages
+
+The application uses several shared packages from the monorepo:
 
 -   `@repo/api` - API client and server code with tRPC.
 -   `@repo/auth` - Authentication logic and utilities.
 -   `@repo/db` - Database schemas and client.
 -   `@repo/ui` - Shared UI components library.
--   `@repo/typescript-config` - Shared TypeScript configuration.
--   `@repo/tailwind-config` - Shared Tailwind CSS configuration.
 
 ## Environment Variables
 
