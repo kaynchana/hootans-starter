@@ -22,11 +22,12 @@ tools
 
 ## Key Features
 
-- Modern stack with latest releases: React 19, Tailwind CSS v4, tRPC v11, pnpm v10, Biome v1
-- Tanstack Router + Hono instead of Next.js
-- Better Auth instead of Auth.js
-- Valibot for validation instead of Zod
-- Tanstack Form instead of React Hook Form
+- Modern stack with latest releases: React 19, Tailwind CSS v4, tRPC v11, pnpm v10
+- Tanstack Router + Hono instead of Next.js.
+- Biome.js over ESLint + Prettier for that vroom-vroom linting and formatting.
+- Better Auth instead of Auth.js for simpler and straightforward authentication.
+- Valibot for validation instead of Zod for minimal bundle sizes.
+- Tanstack Form instead of React Hook Form for more robust form solution.
 - Per-package environment variables (turborepo best practice)
 - Docker/Podman containerization for production deployment
 
