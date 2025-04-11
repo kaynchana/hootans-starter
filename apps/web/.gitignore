@@ -1,9 +1,26 @@
 .cache/
 .turbo/
+**/.turbo/turbo-*.log
 .DS_Store
 
+# TypeScript
+tsconfig.tsbuildinfo
+
+# Environment variables
 .env*
 !.env.example
 
+# Build outputs
 dist/
 node_modules/
+
+# Vitest related
+coverage/
+.nyc_output/
+*.coverage.json
+coverage.json
+
+# Playwright related
+playwright-report/
+test-results/
+playwright/.cache/
