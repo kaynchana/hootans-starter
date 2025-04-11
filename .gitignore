@@ -4,11 +4,27 @@ out/
 
 .cache/
 .turbo/
+**/.turbo/turbo-*.log
+
+# TypeScript
+tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
 
 # Vitest related
 coverage/
+**/coverage/
+.nyc_output/
+**/.nyc_output/
 *.coverage.json
 coverage.json
+
+# Playwright related
+playwright-report/
+test-results/
+playwright/.cache/
+**/playwright-report/
+**/test-results/
+**/playwright/.cache/
 
 .env*
 !.env.example

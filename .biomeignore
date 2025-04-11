@@ -32,6 +32,14 @@ coverage/
 .nyc_output/
 **/.nyc_output/
 
+# Playwright reports
+playwright-report/
+**/playwright-report/
+test-results/
+**/test-results/
+playwright/.cache/
+**/playwright/.cache/
+
 # Environment and local files
 .env
 .env.*
