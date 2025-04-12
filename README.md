@@ -43,6 +43,9 @@ tools
 ## Quick Start
 
 ```bash
+# Create new project using this template
+pnpm dlx create-turbo@latest -m pnpm -e https://github.com/kaynchana/hootans-starter <PROJECT_NAME>
+
 # Install dependencies
 pnpm install
 
