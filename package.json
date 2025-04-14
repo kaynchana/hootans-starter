@@ -17,6 +17,7 @@
     "generate-routes": "turbo -F web generate-routes",
     "lint": "pnpm biome:lint",
     "lint:fix": "pnpm biome:lint",
+    "migrate-deps": "pnpx codemod pnpm/catalog",
     "postclean": "git clean -xdf .cache .turbo node_modules",
     "start": "turbo run start",
     "test": "turbo run test",

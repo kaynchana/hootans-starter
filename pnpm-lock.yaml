@@ -15,6 +15,9 @@ catalogs:
     '@hono/trpc-server':
       specifier: ^0.3.4
       version: 0.3.4
+    '@playwright/test':
+      specifier: ^1.42.1
+      version: 1.51.1
     '@radix-ui/react-avatar':
       specifier: ^1.1.3
       version: 1.1.3
@@ -162,6 +165,9 @@ catalogs:
     turbo:
       specifier: ^2.5.0
       version: 2.5.0
+    tw-animate-css:
+      specifier: ^1.2.5
+      version: 1.2.5
     typescript:
       specifier: ^5.4.5
       version: 5.8.3
@@ -295,7 +301,7 @@ importers:
         version: 1.0.0(typescript@5.8.3)
     devDependencies:
       '@playwright/test':
-        specifier: ^1.42.1
+        specifier: 'catalog:'
         version: 1.51.1
       '@repo/api':
         specifier: workspace:*
@@ -512,7 +518,7 @@ importers:
   tools/playwright-config:
     dependencies:
       '@playwright/test':
-        specifier: ^1.42.1
+        specifier: 'catalog:'
         version: 1.51.1
     devDependencies:
       '@repo/typescript-config':
@@ -534,7 +540,7 @@ importers:
         specifier: 'catalog:'
         version: 1.0.7(tailwindcss@4.1.3)
       tw-animate-css:
-        specifier: ^1.2.5
+        specifier: 'catalog:'
         version: 1.2.5
 
   tools/typescript: {}

@@ -39,7 +39,7 @@
     "valibot": "catalog:"
   },
   "devDependencies": {
-    "@playwright/test": "^1.42.1",
+    "@playwright/test": "catalog:",
     "@repo/api": "workspace:*",
     "@repo/tailwind-config": "workspace:*",
     "@repo/tools-playwright-config": "workspace:*",
