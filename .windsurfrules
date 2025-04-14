@@ -1,0 +1,183 @@
+# KreatrDash Project Rules
+
+## Project Structure
+
+1. This project uses Turborepo for monorepo management with the following structure:
+   - `apps/` - Contains all applications
+     - `apps/web/` - React frontend application
+     - `apps/server/` - Hono-based backend server
+   - `packages/` - Shared packages used across applications
+     - `packages/api/` - API client and server code with tRPC
+     - `packages/auth/` - Authentication logic and utilities
+     - `packages/db/` - Database schemas and client
+     - `packages/ui/` - Shared UI components library
+   - `tools/` - Development and build tools
+     - `tools/playwright-config/` - Shared Playwright configuration
+     - `tools/tailwind/` - Shared Tailwind CSS configuration
+     - `tools/typescript/` - Shared TypeScript configuration
+     - `tools/vitest-config/` - Shared Vitest configuration
+
+## Technology Stack
+
+2. Frontend (Web App):
+   - React with TypeScript
+   - TanStack Router for file-based routing
+   - TanStack Query for data fetching
+   - TanStack Form for form handling
+   - Valibot for validation
+   - shadcn/ui components (based on Radix UI with Tailwind CSS)
+   - Tailwind CSS for styling
+   - SuperJSON for data transformation
+
+3. Backend (Server):
+   - Hono for API server
+   - tRPC for type-safe API
+   - better-auth for authentication
+   - Drizzle ORM with PostgreSQL
+   - Valibot for schema validation
+   - Node.js server with @hono/node-server
+
+## Development Workflow
+
+4. Package Management:
+   - Use pnpm for package management
+   - Use `pnpm --filter=<package-name>` for working with specific packages
+   - Run `pnpm clean` to remove all .cache, .turbo, dist, node_modules
+   - Find package names with `find . -maxdepth 3 -name "package.json" -exec grep '"name":' {} \;`
+   - Use `pnpx codemod pnpm/catalog` to migrate dependencies to pnpm-workspace.yaml
+
+5. Code Quality:
+   - Use Biome for linting and formatting (replaces ESLint and Prettier)
+   - Run `pnpm format` or `pnpm biome:format` to format code
+   - Run `pnpm lint` or `pnpm biome:lint` to lint code
+   - Run `pnpm biome:check` to check both linting and formatting
+   - Run `pnpm typecheck` to check TypeScript types
+
+6. Database:
+   - Use Drizzle ORM with PostgreSQL
+   - Run `pnpm db:push` to push schema changes to the database
+   - Configure database connection in both server and db package:
+     - `SERVER_POSTGRES_URL` in `apps/server/.env` for runtime
+     - `DB_POSTGRES_URL` in `packages/db/.env` for migrations
+
+## Coding Conventions
+
+7. React Components:
+   - Use functional components with hooks
+   - Organize route-based components in `src/routes/` directory
+   - Place shared components in `src/routes/-components/`
+     - `src/routes/-components/common/` - Common UI components (e.g., Spinner, form fields)
+     - `src/routes/-components/layout/` - Layout components (e.g., navigation)
+   - Use shadcn/ui component patterns with Tailwind CSS
+   - Use the `cn` utility function from `@repo/ui/lib/utils` to conditionally join class names
+
+8. API and Data Fetching:
+   - Use tRPC for type-safe API calls
+   - Organize tRPC routers by feature
+   - Use Valibot for input validation
+   - Use proper error handling with TRPCError
+   - Use SuperJSON for automatic handling of dates, Maps, Sets, etc.
+   - Use middleware for common logic like authentication
+   - Create proper context objects to share resources across procedures
+   - Only export types, not the actual router implementations, from server code to client code
+
+9. Routing:
+   - Use TanStack Router with file-based routing
+   - Follow naming conventions:
+     - Files named `layout.tsx` define layout components
+     - Files named `index.tsx` define index routes
+     - Directories starting with `_` (like `_protected`) are used for layout grouping
+     - Directories starting with `$` (like `$tweetid`) are used for dynamic parameters
+   - Route structure:
+     - `src/routes/__root.tsx` - The root layout component
+     - `src/routes/_public/layout.tsx` - Layout for public routes
+     - `src/routes/_protected/layout.tsx` - Layout for protected routes
+   - Route generation:
+     - Routes are automatically generated when running `pnpm dev`
+     - Manually regenerate routes with `pnpm generate-routes`
+     - Exclude `routeTree.gen.ts` from your IDE to avoid editing generated code
+
+10. Authentication:
+    - Use better-auth for authentication
+    - When integrating better-auth plugins (e.g., organization), follow the documentation exactly
+    - Run `pnpm auth:schema:generate` after modifying auth files
+    - After schema changes, run `pnpm db:push` to update the database
+    - If type inference doesn't work immediately, run `pnpm clean && pnpm install` and restart TS Server
+
+## UI Components
+
+11. Component Library:
+    - Use shadcn/ui components from the `@repo/ui` package
+    - Add new shadcn components with `pnpm ui-add <component-name>` or use interactive mode with `pnpm ui-add`
+      - Press `i` to enter interactive mode
+      - Use `j/k` or arrow keys to navigate
+      - Use `<Space>` to toggle select components
+      - Hit `<Enter>` to install selected components
+    - Use Class Variance Authority (CVA) for component variants
+    - Use the `cn` utility function to conditionally join class names
+    - Follow component patterns:
+      - Primitive Component Pattern for basic HTML elements
+      - Radix UI Composition Pattern for complex components
+      - Use `asChild` prop for slot composition
+
+12. Forms:
+    - Use TanStack Form with Valibot for form validation
+    - Define validation schemas with Valibot
+    - Use form.Field for field-level validation
+    - Handle form submission with proper error handling
+    - Display validation errors inline with form fields
+
+## Environment Setup
+
+13. Environment Variables:
+    - Use Valibot for type-safe environment variables
+    - Copy example environment files with `pnpm env:copy-example`
+    - Configure database connection in both server and db package
+    - Web app environment variables:
+      - `PUBLIC_SERVER_URL` - Backend API server URL
+      - `PUBLIC_BASE_PATH` - Base URL path for deployment
+    - Server environment variables:
+      - `SERVER_PORT` - Port for the server (default: 3035)
+      - `SERVER_HOST` - Host for the server (default: localhost)
+      - `SERVER_AUTH_SECRET` - Secret for authentication
+      - `SERVER_POSTGRES_URL` - PostgreSQL connection URL
+      - `PUBLIC_WEB_URL` - Web application URL
+
+14. Local Development:
+    - Start all applications with `pnpm dev`
+    - Web application runs on http://localhost:8085
+    - Backend server runs on http://localhost:3035
+    - Use Docker Compose for local PostgreSQL: `docker compose up db --detach`
+
+## Testing
+
+15. Testing Framework:
+    - Use Vitest for unit and integration testing
+    - Use Playwright for end-to-end testing
+    - Shared test configurations in tools directory
+
+## Containerization & Deployment
+
+16. Docker Setup:
+    - Use multi-stage builds for production Docker images
+    - Base image: node:22-alpine
+    - Use Turbo for pruning dependencies: `turbo prune web --docker`
+    - Set proper environment variables in Dockerfile
+    - Add healthcheck for server container
+    - Use non-root user for production containers
+
+17. Database Integration with Drizzle:
+    - Define database schemas in `packages/db/src/schemas/`
+    - Use `pgTable` from Drizzle ORM to define tables
+    - Create validation schemas with `createInsertSchema` from drizzle-valibot
+    - Use Valibot pipes for additional validation rules
+    - Example:
+      ```typescript
+      export const CreateTweetSchema = v.omit(
+        createInsertSchema(tweet, {
+          title: v.pipe(v.string(), v.maxLength(256)),
+          content: v.pipe(v.string(), v.maxLength(512)),
+        }),
+        ['id', 'createdAt', 'createdBy'],
+      );
+      ```
