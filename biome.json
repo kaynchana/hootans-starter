@@ -66,6 +66,8 @@
       "node_modules/**",
       ".turbo/**",
       ".cache/**",
+      "**/*.gen.ts",
+      "**/*.gen.tsx",
       "coverage/**"
     ]
   },

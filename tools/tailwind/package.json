@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "tailwindcss": "catalog:",
-    "tailwindcss-animate": "catalog:"
+    "tailwindcss-animate": "catalog:",
+    "tw-animate-css": "^1.2.5"
   },
   "devDependencies": {}
 }

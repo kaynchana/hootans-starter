@@ -30,7 +30,7 @@
     "ui-add": "turbo run ui-add -F @repo/ui --",
     "biome:check": "biome check .",
     "biome:format": "biome format . --write",
-    "biome:lint": "biome lint . --apply"
+    "biome:lint": "biome lint . --write"
   },
   "packageManager": "pnpm@10.7.1",
   "devDependencies": {
